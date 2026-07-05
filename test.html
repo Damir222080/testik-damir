@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тайны | Игра о тебе</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0b0f1c, #1a1f35);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 40px;
+            padding: 40px 30px;
+            max-width: 550px;
+            width: 100%;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7);
+            transition: all 0.3s;
+        }
+        h1 {
+            text-align: center;
+            color: #f0e9ff;
+            font-size: 2.4rem;
+            font-weight: 300;
+            letter-spacing: 4px;
+            margin-bottom: 8px;
+            text-shadow: 0 0 20px rgba(180, 130, 255, 0.3);
+        }
+        .subtitle {
+            text-align: center;
+            color: #9a8cba;
+            font-size: 0.95rem;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            border-bottom: 1px dashed #3a2f55;
+            padding-bottom: 20px;
+        }
+        .level-badge {
+            background: #2e234a;
+            color: #c6b0ff;
+            padding: 6px 18px;
+            border-radius: 40px;
+            display: inline-block;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            border: 1px solid #5a47a0;
+        }
+        .question {
+            color: #ffffff;
+            font-size: 1.7rem;
+            font-weight: 400;
+            line-height: 1.4;
+            margin: 20px 0 30px 0;
+            min-height: 80px;
+            padding: 10px 0;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        input {
+            padding: 16px 20px;
+            border-radius: 60px;
+            border: 1px solid #4a3b70;
+            background: rgba(0, 0, 0, 0.35);
+            color: #fff;
+            font-size: 1.1rem;
+            outline: none;
+            transition: 0.3s;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+        input:focus {
+            border-color: #b28aff;
+            box-shadow: 0 0 25px rgba(150, 100, 255, 0.3);
+        }
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        button {
+            flex: 1;
+            padding: 16px 10px;
+            border-radius: 60px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            letter-spacing: 1px;
+            background: #5f47b0;
+            color: #fff;
+            box-shadow: 0 8px 0 #34245a;
+            transform: translateY(0);
+        }
+        button:active {
+            transform: translateY(5px);
+            box-shadow: 0 3px 0 #34245a;
+        }
+        .btn-hint {
+            background: #2f3d6b;
+            box-shadow: 0 8px 0 #1b2542;
+        }
+        .btn-hint:disabled {
+            opacity: 0.4;
+            transform: translateY(5px);
+            box-shadow: 0 3px 0 #1b2542;
+            pointer-events: none;
+        }
+        .message {
+            margin-top: 25px;
+            padding: 16px 20px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.04);
+            color: #cec0ee;
+            font-size: 1rem;
+            min-height: 60px;
+            border-left: 4px solid #6d56b8;
+            line-height: 1.5;
+            transition: 0.3s;
+            word-break: break-word;
+        }
+        .message.success {
+            border-left-color: #6fcf97;
+            color: #b0f0c0;
+        }
+        .message.error {
+            border-left-color: #eb5757;
+            color: #f5a0a0;
+        }
+        .hint-block {
+            margin-top: 15px;
+            padding: 14px 18px;
+            background: #1e2745;
+            border-radius: 20px;
+            color: #b7a5e6;
+            font-size: 0.95rem;
+            border: 1px dashed #5d4b8a;
+            display: none;
+        }
+        .hint-block.visible {
+            display: block;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #4d416b;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+        }
+        .code-reveal {
+            font-family: monospace;
+            background: #0f0a1a;
+            padding: 8px 16px;
+            border-radius: 30px;
+            display: inline-block;
+            color: #c8b0ff;
+            border: 1px solid #4e3b7a;
+        }
+        @media (max-width: 480px) {
+            .container { padding: 25px 18px; }
+            h1 { font-size: 1.8rem; }
+            .question { font-size: 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+        <h1>🔐 ТАЙНЫ</h1>
+        <div class="subtitle">игра на знание меня</div>
+
+        <div class="level-badge" id="levelDisplay">Уровень 1 / 5</div>
+
+        <div class="question" id="questionText">Загружаю вопрос...</div>
+
+        <div class="input-group">
+            <input type="text" id="answerInput" placeholder="Введи код / ответ..." autocomplete="off">
+            <div class="btn-row">
+                <button id="checkBtn">✅ Проверить</button>
+                <button id="hintBtn" class="btn-hint">💡 Подсказка</button>
+            </div>
+        </div>
+
+        <div class="message" id="messageArea">💬 Введи ответ и нажми «Проверить».</div>
+
+        <div class="hint-block" id="hintBlock">🔍 Здесь появится подсказка</div>
+
+        <div class="footer">каждый уровень — новая тайна</div>
+    </div>
+
+    <script>
+        // ========== НАСТРОЙ ИГРЫ ==========
+        // Замени ВСЕ данные на свои (вопросы, коды, подсказки)
+
+        const levels = [
+            {
+                question: "В каком году я родился?",
+                code: "2005", // ответ (код)
+                hint: "Мой знак зодиака — Стрелец",
+                hintQuestion: "Какой мой знак зодиака?" // чтобы получить подсказку
+            },
+            {
+                question: "Какой мой любимый цвет?",
+                code: "синий",
+                hint: "Он есть на флаге РФ",
+                hintQuestion: "Какой цвет на флаге РФ?"
+            },
+            {
+                question: "Как зовут моего кота (или питомца)?",
+                code: "Барсик",
+                hint: "Он рыжий",
+                hintQuestion: "Какой окрас у моего кота?"
+            },
+            {
+                question: "Номер школы, где я учился?",
+                code: "23",
+                hint: "Это число от 10 до 30",
+                hintQuestion: "В каком районе была школа?"
+            },
+            {
+                question: "Сколько мне лет было, когда я пошёл в 1 класс?",
+                code: "7",
+                hint: "Чётное или нечётное?",
+                hintQuestion: "Я родился зимой или летом?"
+            }
+        ];
+
+        // ========== КОД ИГРЫ (НЕ ТРОГАЙ) ==========
+
+        let currentLevel = 0;
+        let hintUsed = false;
+        let hintUnlocked = false;
+
+        const questionEl = document.getElementById('questionText');
+        const levelDisplay = document.getElementById('levelDisplay');
+        const answerInput = document.getElementById('answerInput');
+        const checkBtn = document.getElementById('checkBtn');
+        const hintBtn = document.getElementById('hintBtn');
+        const messageArea = document.getElementById('messageArea');
+        const hintBlock = document.getElementById('hintBlock');
+
+        function loadLevel(index) {
+            const lv = levels[index];
+            if (!lv) {
+                // финал
+                questionEl.innerHTML = '🎉 Ты прошёл ВСЕ уровни!<br>Ты знаешь меня лучше всех!';
+                levelDisplay.textContent = '🏆 ИГРА ЗАВЕРШЕНА';
+                document.querySelector('.input-group').style.display = 'none';
+                messageArea.innerHTML = '💎 Ты — настоящий друг. Спасибо за игру!';
+                messageArea.className = 'message success';
+                hintBlock.classList.remove('visible');
+                return;
+            }
+            questionEl.textContent = lv.question;
+            levelDisplay.textContent = `Уровень ${index+1} / ${levels.length}`;
+            answerInput.value = '';
+            messageArea.innerHTML = '💬 Введи код и нажми «Проверить».';
+            messageArea.className = 'message';
+            hintBlock.classList.remove('visible');
+            hintUsed = false;
+            hintUnlocked = false;
+            hintBtn.disabled = false;
+            document.querySelector('.input-group').style.display = 'flex';
+        }
+
+        function showMessage(text, type = '') {
+            messageArea.textContent = text;
+            messageArea.className = 'message ' + type;
+        }
+
+        function showHint(text) {
+            hintBlock.textContent = '🔍 ' + text;
+            hintBlock.classList.add('visible');
+        }
+
+        // Проверка ответа
+        checkBtn.addEventListener('click', function() {
+            const lv = levels[currentLevel];
+            if (!lv) return;
+
+            const userAnswer = answerInput.value.trim();
+            if (!userAnswer) {
+                showMessage('❌ Введи что-нибудь!', 'error');
+                return;
+            }
+
+            if (userAnswer.toLowerCase() === lv.code.toLowerCase()) {
+                // правильно!
+                showMessage('✅ Верно! Переходим дальше...', 'success');
+                currentLevel++;
+                setTimeout(() => {
+                    loadLevel(currentLevel);
+                }, 1000);
+            } else {
+                showMessage('❌ Не тот код. Попробуй ещё или используй подсказку.', 'error');
+            }
+        });
+
+        // Подсказка
+        hintBtn.addEventListener('click', function() {
+            const lv = levels[currentLevel];
+            if (!lv) return;
+
+            if (hintUsed) {
+                showMessage('⛔ Ты уже использовал подсказку на этом уровне.', 'error');
+                return;
+            }
+
+            if (!hintUnlocked) {
+                // спрашиваем доп. вопрос, чтобы открыть подсказку
+                const extra = prompt('🔐 Чтобы получить подсказку, ответь на вопрос:\n' + lv.hintQuestion);
+                if (extra === null) {
+                    showMessage('❌ Без ответа подсказку не дам.', 'error');
+                    return;
+                }
+                // проверяем доп. ответ (можно заменить на свою логику)
+                // для простоты — любой непустой ответ
+                if (extra.trim().length < 1) {
+                    showMessage('❌ Слишком короткий ответ. Попробуй ещё.', 'error');
+                    return;
+                }
+                hintUnlocked = true;
+                showMessage('✅ Подсказка разблокирована! Нажми ещё раз.', 'success');
+                return;
+            }
+
+            // показываем подсказку
+            showHint(lv.hint);
+            hintUsed = true;
+            hintBtn.disabled = true;
+            showMessage('💡 Подсказка показана выше.', '');
+        });
+
+        // Enter на клавиатуре
+        answerInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                checkBtn.click();
+            }
+        });
+
+        // Старт
+        loadLevel(0);
+    </script>
+</body>
+</html>
